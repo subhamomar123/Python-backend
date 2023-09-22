@@ -8,7 +8,7 @@ def handle_change_password(request_body, db_connection, db_cursor):
 
         db_cursor.execute("SELECT password FROM user_details WHERE jwt = %s", (jwt,))
         user_password = db_cursor.fetchone()
-        if password == user_password[0]:
+        if password is not None and user_password is not None:
             update_sql = "UPDATE user_details SET password = %s WHERE jwt = %s"
             update_values = (password, jwt)
             db_cursor.execute(update_sql, update_values)

@@ -1,5 +1,4 @@
 import json
-import jwt
 
 def handle_delete(authorization_header, db_connection, db_cursor):
     try:
@@ -8,7 +7,6 @@ def handle_delete(authorization_header, db_connection, db_cursor):
         db_cursor.execute("SELECT id FROM user_details WHERE jwt = %s", (jwt,))
 
         user_id = db_cursor.fetchone()
-        print(user_id)
         if user_id is not None :
             sql = "DELETE FROM user_details WHERE id = %s"
             values = (user_id[0],)

@@ -3,6 +3,7 @@ from http.server import SimpleHTTPRequestHandler
 from urllib.parse import urlparse
 import importlib
 import mysql.connector
+from db import connect_to_database
 
 db_config = {
     "host": "localhost",
@@ -11,14 +12,7 @@ db_config = {
     "database": "python_crud"
 }
 
-try:
-    db_connection = mysql.connector.connect(**db_config)
-    db_cursor = db_connection.cursor()
-    print("Connected to MySQL database successfully.")
-except mysql.connector.Error as err:
-    print(f"Error: {err}")
-    db_connection = None
-    db_cursor = None
+db_connection, db_cursor = connect_to_database()
 
 class MyHandler(SimpleHTTPRequestHandler):
     def do_POST(self):
@@ -29,14 +23,13 @@ class MyHandler(SimpleHTTPRequestHandler):
         if path == '/signup':
             module = importlib.import_module('Routes.signup')
             response = module.handle_signup(self.rfile.read(int(self.headers['Content-Length'])), db_connection, db_cursor)
-        elif path == '/login':
+        elif path == '/login':  
             module = importlib.import_module('Routes.login')
             response = module.handle_login(self.rfile.read(int(self.headers['Content-Length'])), db_connection, db_cursor)
         elif path == '/change_password':
             module = importlib.import_module('Routes.change_password')
-            # response = module.handle_change_password(self.rfile.read(int(self.headers['Content-Length'])), db_connection, db_cursor)
-            response = 1
-
+            response = module.handle_change_password(self.rfile.read(int(self.headers['Content-Length'])), db_connection, db_cursor)
+        
         self.send_response(200)
         self.send_header("Content-type", "application/json")
         self.end_headers()
@@ -52,12 +45,15 @@ class MyHandler(SimpleHTTPRequestHandler):
         elif path == '/delete':
             module = importlib.import_module('Routes.delete')
             response = module.handle_delete(self.headers['Authorization'], db_connection, db_cursor)
+        elif path == '/courses':
+            module = importlib.import_module('Routes.courses')
+            response = module.display_user_courses(self.headers['Authorization'], db_connection, db_cursor)
+
 
         self.send_response(200)
         self.send_header("Content-type", "application/json")
         self.end_headers()
         self.wfile.write(response.encode("utf-8"))
-
 
 port = 8000
 handler = MyHandler
