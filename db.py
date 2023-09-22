@@ -1,14 +1,14 @@
 import mysql.connector
-
-db_config = {
-    "host": "localhost",
-    "user": "root",
-    "password": "1234",
-    "database": "python_crud"
-}
+from globals import DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE
 
 def connect_to_database():
     try:
+        db_config = {
+            "host": DB_HOST,
+            "user": DB_USER,
+            "password": DB_PASSWORD,
+            "database": DB_DATABASE
+        }
         db_connection = mysql.connector.connect(**db_config)
         db_cursor = db_connection.cursor()
         print("Connected to MySQL database successfully.")

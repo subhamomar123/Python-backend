@@ -8,7 +8,6 @@ def display_user_courses(authorization_header, db_connection, db_cursor):
         jwt_token = authorization_header
         try:
             decoded_payload = jwt.decode(jwt_token, secret_key, algorithms=['HS256'])
-            print(decoded_payload)
 
             user_id = decoded_payload.get('id')
 

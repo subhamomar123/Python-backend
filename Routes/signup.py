@@ -1,12 +1,16 @@
 import json
 import random
+import bcrypt
 
 def handle_signup(request_body, db_connection, db_cursor):
     try:
         request_data = json.loads(request_body)
         email, password = request_data.get("email"), request_data.get("password")
+
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+
         sql = "INSERT INTO user_details (email, password) VALUES (%s, %s)"
-        values = (email, password)
+        values = (email, hashed_password)
         db_cursor.execute(sql, values)
 
         db_connection.commit()
@@ -21,12 +25,15 @@ def handle_signup(request_body, db_connection, db_cursor):
             sql = "INSERT INTO user_courses (user_id, course_id) VALUES (%s, %s)"
             values = (user_id[0], course_id)
             db_cursor.execute(sql, values)
-            
+
         db_connection.commit()
 
-        return json.dumps({"message": "User registered successfully.", "status": "OK"})
+        response = {"message": "User registered successfully.", "status": "OK"}
+        return json.dumps(response), 200
 
     except json.JSONDecodeError as json_err:
-        return json.dumps({"message": f"JSON Parsing Error: {json_err}", "status": "Error"})
+        response = {"message": f"JSON Parsing Error: {json_err}", "status": "Error"}
+        return json.dumps(response), 400
     except Exception as e:
-        return json.dumps({"message": f"An error occurred: {e}", "status": "Error"})
+        response = {"message": f"An error occurred: {e}", "status": "Error"}
+        return json.dumps(response), 500

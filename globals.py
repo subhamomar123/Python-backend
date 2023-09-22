@@ -1,1 +1,5 @@
 SECRET_KEY = "helloworld"
+DB_HOST = "localhost"
+DB_USER = "root"
+DB_PASSWORD = "1234"
+DB_DATABASE = "python_crud"
