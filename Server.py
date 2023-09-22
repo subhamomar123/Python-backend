@@ -1,37 +1,69 @@
 import http.server
 from http.server import SimpleHTTPRequestHandler
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse
 import importlib
+import mysql.connector
+
+db_config = {
+    "host": "localhost",
+    "user": "root",
+    "password": "1234",
+    "database": "python_crud"
+}
+
+try:
+    db_connection = mysql.connector.connect(**db_config)
+    db_cursor = db_connection.cursor()
+    print("Connected to MySQL database successfully.")
+except mysql.connector.Error as err:
+    print(f"Error: {err}")
+    db_connection = None
+    db_cursor = None
 
 class MyHandler(SimpleHTTPRequestHandler):
-    def do_GET(self):
+    def do_POST(self):
         url_parts = urlparse(self.path)
         path = url_parts.path
-        query = parse_qs(url_parts.query)
-
-        if path == '/':
-            module = importlib.import_module('Routes.Base_route')
-            response = module.handle_base_route()
-        elif path == '/route1':
-            module = importlib.import_module('Routes.route1')
-            response = module.handle_route1()
-        elif path == '/route2':
-            module = importlib.import_module('Routes.route2')
-            response = module.handle_route2()
-        else:
-            self.send_response(404)
-            self.send_header("Content-type", "application/json")
-            self.end_headers()
-            response_data = {
-                "message": "Not Found",
-                "status": "Error"
-            }
-            response = json.dumps(response_data)
+        response = ""
+        
+        if path == '/signup':
+            module = importlib.import_module('Routes.signup')
+            response = module.handle_signup(self.rfile.read(int(self.headers['Content-Length'])), db_connection, db_cursor)
+        elif path == '/login':
+            module = importlib.import_module('Routes.login')
+            response = module.handle_login(self.rfile.read(int(self.headers['Content-Length'])), db_connection, db_cursor)
 
         self.send_response(200)
         self.send_header("Content-type", "application/json")
         self.end_headers()
         self.wfile.write(response.encode("utf-8"))
+
+    def do_GET(self):
+        url_parts = urlparse(self.path)
+        path = url_parts.path
+        
+        if path == '/':
+            module = importlib.import_module('Routes.Base_route')
+            response = module.handle_base_route()
+
+        self.send_response(200)
+        self.send_header("Content-type", "application/json")
+        self.end_headers()
+        self.wfile.write(response.encode("utf-8"))
+
+    def do_DELETE(self):
+        url_parts = urlparse(self.path)
+        path = url_parts.path
+        
+        if path == '/delete':
+            module = importlib.import_module('Routes.delete')
+            response = module.handle_delete(self.rfile.read(int(self.headers['Content-Length'])), db_connection, db_cursor)
+        
+        self.send_response(200)
+        self.send_header("Content-type", "application/json")
+        self.end_headers()
+        self.wfile.write(response.encode("utf-8"))
+
 
 port = 8000
 handler = MyHandler
