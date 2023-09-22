@@ -7,10 +7,10 @@ def handle_change_password(request_body, db_connection, db_cursor):
     try:
         secret_key = globals.SECRET_KEY
         request_data = json.loads(request_body)
-        jwt_token = request_data.get("jwt")  # Change variable name to avoid conflict
+        jwt_token = request_data.get("jwt")
         new_password = request_data.get("new_password")
 
-        decoded_token = jwt.decode(jwt_token, secret_key, algorithms=['HS256'])  # Use PyJWT to decode the token
+        decoded_token = jwt.decode(jwt_token, secret_key, algorithms=['HS256'])
         user_id = decoded_token.get('id')
 
         salt = bcrypt.gensalt()

@@ -52,6 +52,6 @@ class MyHandler(SimpleHTTPRequestHandler):
 port = 8000
 handler = MyHandler
 
-with http.server.HTTPServer(("", port), handler) as httpd:
-    print(f"Serving on port {port}...")
+with http.server.HTTPServer(("", port), handler) as httpd: # " " means it will listen to all ip's
+    print(f"Serving on port {port}...") 
     httpd.serve_forever()
