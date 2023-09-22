@@ -1,18 +1,19 @@
 import json
 import jwt
 
-def handle_delete(request_body, db_connection, db_cursor):
+def handle_delete(authorization_header, db_connection, db_cursor):
     try:
-        request_data = json.loads(request_body)
-        jwt = request_data.get("jwt")
+        jwt = authorization_header
 
         db_cursor.execute("SELECT id FROM user_details WHERE jwt = %s", (jwt,))
+
         user_id = db_cursor.fetchone()
-        SECRET_KEY = "helloworld"
-        if len(user_id) :
+        print(user_id)
+        if user_id is not None :
             sql = "DELETE FROM user_details WHERE id = %s"
-            values = (user_id)
+            values = (user_id[0],)
             db_cursor.execute(sql, values)
+            db_connection.commit()
             response_data = {
                 'message': 'Delete successful'
             }

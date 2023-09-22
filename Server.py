@@ -32,6 +32,10 @@ class MyHandler(SimpleHTTPRequestHandler):
         elif path == '/login':
             module = importlib.import_module('Routes.login')
             response = module.handle_login(self.rfile.read(int(self.headers['Content-Length'])), db_connection, db_cursor)
+        elif path == '/change_password':
+            module = importlib.import_module('Routes.change_password')
+            # response = module.handle_change_password(self.rfile.read(int(self.headers['Content-Length'])), db_connection, db_cursor)
+            response = 1
 
         self.send_response(200)
         self.send_header("Content-type", "application/json")
@@ -45,20 +49,10 @@ class MyHandler(SimpleHTTPRequestHandler):
         if path == '/':
             module = importlib.import_module('Routes.Base_route')
             response = module.handle_base_route()
-
-        self.send_response(200)
-        self.send_header("Content-type", "application/json")
-        self.end_headers()
-        self.wfile.write(response.encode("utf-8"))
-
-    def do_DELETE(self):
-        url_parts = urlparse(self.path)
-        path = url_parts.path
-        
-        if path == '/delete':
+        elif path == '/delete':
             module = importlib.import_module('Routes.delete')
-            response = module.handle_delete(self.rfile.read(int(self.headers['Content-Length'])), db_connection, db_cursor)
-        
+            response = module.handle_delete(self.headers['Authorization'], db_connection, db_cursor)
+
         self.send_response(200)
         self.send_header("Content-type", "application/json")
         self.end_headers()
