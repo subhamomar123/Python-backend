@@ -21,11 +21,6 @@ def handle_login(request_body, db_connection, db_cursor):
 
             token = jwt.encode(payload, secret_key, algorithm='HS256')
 
-            update_sql = "UPDATE user_details SET jwt = %s WHERE email = %s"
-            update_values = (token, email)
-            db_cursor.execute(update_sql, update_values)
-            db_connection.commit()
-
             return json.dumps({'message': 'Login successful', 'token': token}), 200
         else:
             return json.dumps({"message": "Invalid credentials", "status": "Error"}), 401
